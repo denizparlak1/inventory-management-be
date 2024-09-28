@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fatura Önizleme ve İndirme</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 40px;
+            color: #333;
+        }
+
+        #pdf-content {
+            width: 210mm; /* A4 genişliği */
+            min-height: 297mm; /* A4 yüksekliği */
+            margin: 0 auto;
+            padding: 20mm; /* Yazdırılabilir alan */
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #004085;
+            box-sizing: border-box;
+        }
+
+        .header {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-container {
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #dddddd;
+            border-radius: 12px;
+        }
+
+        .logo-container img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #004085;
+            border-bottom: 2px solid #004085;
+            padding-bottom: 5px;
+        }
+
+        .details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .details p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555555;
+        }
+
+        .details strong {
+            color: #004085;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        table th, table td {
+            border: 1px solid #dddddd;
+            padding: 10px;
+        }
+
+        table th {
+            background-color: #004085;
+            color: white;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+
+        table td {
+            text-align: center;
+            color: #333;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            margin-top: 20px;
+            color: #868e96;
+            border-top: 1px solid #dddddd;
+            padding-top: 10px;
+        }
+
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            margin-bottom: 40px; /* İmza alanını büyüttüm */
+        }
+
+        .signature-box {
+            width: 45%; /* Alanı büyüttüm */
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 60px; /* Çizgiyi aşağıya çektim */
+            width: 100%;
+        }
+
+        .signature-label {
+            margin-top: 10px;
+            font-size: 16px; /* Yazıyı biraz büyüttüm */
+            color: #555555;
+            font-weight: bold; /* Kalın yap */
+        }
+
+        .signature-value {
+            font-weight: bold; /* Kalın yap */
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #004085;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #003366;
+        }
+    </style>
+</head>
+<body>
+
+<div id="pdf-content">
+    <div class="header">
+        <div class="logo-container" id="logoPreview">
+            <p>Logo Yok</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>İş Detayları</h3>
+        <div class="details">
+            <div>
+                <p><strong>İş Adı:</strong> <span id="job-name"></span></p>
+                <p><strong>Adres:</strong> <span id="address"></span></p>
+            </div>
+            <div>
+                <p><strong>Oluşturma Tarihi:</strong> <span id="date"></span></p>
+                <p><strong>İlçe:</strong> <span id="district"></span></p>
+            </div>
+        </div>
+        <div class="details">
+            <div>
+                <p><strong>Kurum:</strong> <span id="institution"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Ürünler</h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Sıra No</th>
+                <th>Malzemenin Cinsi</th>
+                <th>Ürün Kodu</th>
+                <th>Miktar</th>
+                <th>Birim</th>
+            </tr>
+            </thead>
+            <tbody id="product-list">
+            </tbody>
+        </table>
+    </div>
+
+    <!-- İmza Alanları -->
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <p class="signature-label">İş Emrini Hazırlayan: <span id="prepared-by-sign" class="signature-value"></span></p>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <p class="signature-label">Teslim Alan: <span id="delivered-to" class="signature-value"></span></p>
+        </div>
+    </div>
+</div>
+
+<div style="text-align:center;">
+    <button id="download-btn">PDF İndir</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+<script>
+    fetch("/api/product/invoice-data/")
+        .then(response => response.json())
+        .then(invoiceData => {
+            document.getElementById('job-name').textContent = invoiceData.invoice.jobName;
+            document.getElementById('address').textContent = invoiceData.invoice.fullAddress;
+            document.getElementById('district').textContent = invoiceData.invoice.district;
+            document.getElementById('date').textContent = invoiceData.invoice.creationDate;
+            document.getElementById('institution').textContent = invoiceData.invoice.institution;
+
+            // Teslim alan ve iş emrini hazırlayanın isimleri
+            document.getElementById('delivered-to').textContent = invoiceData.invoice.responsiblePerson || 'Teslim Alan Yok';
+            document.getElementById('prepared-by-sign').textContent = invoiceData.invoice.preparedBy;
+
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '';  // Mevcut içeriği temizleyin
+            invoiceData.products.forEach((product, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${product.name}</td>
+                    <td>${product.code}</td>
+                    <td>${product.stockOut}</td>
+                    <td>${product.unit || 'Birim yok'}</td>
+                `;
+                productList.appendChild(row);
+            });
+
+            if (invoiceData.logo_path) {
+                const logoPreview = document.getElementById("logoPreview");
+                logoPreview.innerHTML = `<img src="${invoiceData.logo_path}" alt="Company Logo">`;
+            }
+        })
+        .catch(error => console.error("Veriler yüklenemedi:", error));
+
+document.getElementById("download-btn").addEventListener("click", () => {
+    const element = document.getElementById("pdf-content");
+    const opt = {
+        filename: 'stok_cikis_bilgileri.pdf',
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(element).set(opt).save().then(() => {
+        html2pdf().from(element).output('datauristring').then((pdfBase64) => {
+            const fileData = {
+                file: pdfBase64.split(",")[1],
+                fileName: 'stok_cikis_bilgileri'
+            };
+
+            fetch('/api/product/invoice/save-pdf/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(fileData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Sunucuya kaydedildi:", data);
+            })
+            .catch(error => {
+                console.error("Kaydetme işlemi sırasında hata oluştu:", error);
+            });
+        });
+    });
+});
+
+</script>
+
+</body>
+</html>
