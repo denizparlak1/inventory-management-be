@@ -32,7 +32,7 @@ jobs:
           pyinstaller --onefile --windowed --add-data "static;static" --hidden-import "pydantic" --hidden-import "databases" --hidden-import "sqlalchemy" main.py
 
       - name: Upload built files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: windows-exe
           path: dist/
