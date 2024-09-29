@@ -24,7 +24,7 @@ class ProductCreate(BaseModel):
     warehouse: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ProductUpdate(BaseModel):
@@ -44,7 +44,7 @@ class ProductUpdate(BaseModel):
     warehouse: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class ProductDeleteResponse(BaseModel):
@@ -61,7 +61,7 @@ class ChangeLog(BaseModel):
     timestamp: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class LowStockProductResponse(BaseModel):
