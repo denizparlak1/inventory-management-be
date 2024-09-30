@@ -172,50 +172,21 @@ async def upload_logo(file: UploadFile = File(...)):
         print(e)
         return {"success": False, "error": str(e)}
 
-
 @router.get("/invoice-data/")
 async def get_invoice_data():
     try:
-        # PyInstaller geçici dizinini kontrol eden fonksiyon
-        def get_static_directory():
-            if getattr(sys, 'frozen', False):
-                # PyInstaller ile çalışıyorsak geçici dizini kullan
-                base_dir = sys._MEIPASS
-            else:
-                # Normal çalışma dizini
-                base_dir = os.path.dirname(os.path.abspath(__file__))
-
-            return os.path.join(base_dir, "static")
-
-        # Statik dizini al
-        static_directory = get_static_directory()
-
-        # JSON dosyasını yükle
-        json_path = os.path.join(static_directory, "invoice_data.json")
-        with open(json_path, "r", encoding="utf-8") as f:
+        with open("static/invoice_data.json", "r", encoding="utf-8") as f:
             invoice_data = json.load(f)
 
-        # Logoları kontrol et ve logo yolunu ekle
-        upload_directory = os.path.join(static_directory, "logos")
+        upload_directory = "static/logos"
         logo_files = os.listdir(upload_directory)
         print(logo_files)
         if logo_files:
-            # URL yolunu oluştur
-            logo_file_path = os.path.join(upload_directory, logo_files[0])
-
-            # Dosyanın gerçekten mevcut olup olmadığını kontrol et
-            if os.path.exists(logo_file_path):
-                invoice_data["logo_path"] = f"/static/logos/{logo_files[0]}"
-            else:
-                print(f"Logo file {logo_file_path} not found.")
-                invoice_data["logo_path"] = None
-
+            invoice_data["logo_path"] = f"/static/logos/{logo_files[0]}"
+            print(invoice_data["logo_path"])
         return JSONResponse(content=invoice_data)
-
     except FileNotFoundError:
         return JSONResponse(content={"message": "Invoice data not found"}, status_code=404)
-    except Exception as e:
-        return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=500)
 
 
 @router.post("/invoice-data/")
