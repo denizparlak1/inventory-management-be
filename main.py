@@ -28,13 +28,14 @@ app.add_middleware(
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-static_dir = os.path.join(BASE_DIR, "static")
+
 UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")
 
 INVOICE_DATA_PATH = os.path.join(BASE_DIR, "static", "invoice_data.json")
 LOGOS_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")
 
 # Statik dosyalar (React build dosyaları)
+static_dir = os.path.join(BASE_DIR, "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # API router'ları ekliyoruz

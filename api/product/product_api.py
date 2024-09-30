@@ -95,7 +95,7 @@ def read_products(db: Session = Depends(get_db)):
 
 
 @router.delete("/{product_code}/", response_model=ProductDeleteResponse)
-def delete_product(product_code: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),):
+def delete_product(product_code: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user), ):
     product_repo = ProductRepository(db)
 
     product = product_repo.get_by_code(product_code)
@@ -121,7 +121,8 @@ def update_product(
     product_repo = ProductRepository(db)
 
     try:
-        updated_product = product_repo.update_product(product_id, product_data.dict(exclude_unset=True), current_user.name)
+        updated_product = product_repo.update_product(product_id, product_data.dict(exclude_unset=True),
+                                                      current_user.name)
     except HTTPException as e:
         raise e
     return updated_product
@@ -170,31 +171,28 @@ async def upload_logo(file: UploadFile = File(...)):
         print(e)
         return {"success": False, "error": str(e)}
 
+
 @router.get("/invoice-data/")
 async def get_invoice_data():
     try:
-        # JSON dosyasını yükle
         with open("static/invoice_data.json", "r", encoding="utf-8") as f:
             invoice_data = json.load(f)
 
-        # Logoları kontrol et ve logo yolunu ekle
         upload_directory = "static/logos"
         logo_files = os.listdir(upload_directory)
         print(logo_files)
 
-        # Eğer logo dosyası varsa ve dosya yolunu bulabiliyorsak logo yolunu ekleyelim
         if logo_files:
             logo_path = f"/static/logos/{logo_files[0]}"
 
-            # Logonun gerçekten mevcut olup olmadığını kontrol edelim
             if os.path.exists(os.path.join(upload_directory, logo_files[0])):
                 invoice_data["logo_path"] = logo_path
                 print("çıktım")
                 print(invoice_data["logo_path"])
             else:
-                invoice_data["logo_path"] = None  # Logo bulunmazsa None ekle
+                invoice_data["logo_path"] = None
         else:
-            invoice_data["logo_path"] = None  # Eğer logosuz devam etmek isterseniz None ekleyin
+            invoice_data["logo_path"] = None
 
         return JSONResponse(content=invoice_data)
 
@@ -202,7 +200,6 @@ async def get_invoice_data():
         return JSONResponse(content={"message": "Invoice data not found"}, status_code=404)
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=500)
-
 
 
 @router.post("/invoice-data/")
@@ -262,7 +259,8 @@ async def list_pdfs():
 
 
 @router.post("/finalize-stock-out/")
-async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends(get_db),current_user: User = Depends(get_current_user)):
+async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends(get_db),
+                             current_user: User = Depends(get_current_user)):
     product_repo = ProductRepository(db)
 
     try:
@@ -272,7 +270,7 @@ async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends
             if item.unit == "MT":
                 old_stock = int(product.mt) if product.mt is not None else 0
                 new_stock = old_stock - item.stock_out
-                #if new_stock < 0:
+                # if new_stock < 0:
                 #    raise HTTPException(status_code=400,
                 #                        detail=f"Insufficient stock for MT in product code {item.code}")
                 product_data = {"mt": new_stock}
@@ -280,7 +278,7 @@ async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends
             elif item.unit == "KG":
                 old_stock = int(product.kg) if product.kg is not None else 0
                 new_stock = old_stock - item.stock_out
-                #if new_stock < 0:
+                # if new_stock < 0:
                 #    raise HTTPException(status_code=400,
                 #                        detail=f"Insufficient stock for KG in product code {item.code}")
                 product_data = {"kg": new_stock}
@@ -288,7 +286,7 @@ async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends
             elif item.unit == "M2":
                 old_stock = int(product.m2) if product.m2 is not None else 0
                 new_stock = old_stock - item.stock_out
-                #if new_stock < 0:
+                # if new_stock < 0:
                 #    raise HTTPException(status_code=400,
                 #                        detail=f"Insufficient stock for M2 in product code {item.code}")
                 product_data = {"m2": new_stock}
@@ -296,7 +294,7 @@ async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends
             elif item.unit == "Stok":
                 old_stock = int(product.stock) if product.stock is not None else 0
                 new_stock = old_stock - item.stock_out
-                #if new_stock < 0:
+                # if new_stock < 0:
                 #    raise HTTPException(status_code=400,
                 #                        detail=f"Insufficient stock for M2 in product code {item.code}")
                 product_data = {"stock": new_stock}
@@ -304,7 +302,7 @@ async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends
             elif item.unit == "M3":
                 old_stock = int(product.m3) if product.m3 is not None else 0
                 new_stock = old_stock - item.stock_out
-                #if new_stock < 0:
+                # if new_stock < 0:
                 #    raise HTTPException(status_code=400,
                 #                        detail=f"Insufficient stock for M3 in product code {item.code}")
                 product_data = {"m3": new_stock}
@@ -312,7 +310,7 @@ async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends
             elif item.unit == "Ton":
                 old_stock = int(product.ton) if product.ton is not None else 0
                 new_stock = old_stock - item.stock_out
-                #if new_stock < 0:
+                # if new_stock < 0:
                 #    raise HTTPException(status_code=400,
                 #                        detail=f"Insufficient stock for TON in product code {item.code}")
                 product_data = {"ton": new_stock}
@@ -320,7 +318,7 @@ async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends
             elif item.unit == "Adet":
                 old_stock = int(product.adet) if product.adet is not None else 0
                 new_stock = old_stock - item.stock_out
-                #if new_stock < 0:
+                # if new_stock < 0:
                 #    raise HTTPException(status_code=400,
                 #                        detail=f"Insufficient stock for Adet in product code {item.code}")
                 product_data = {"adet": new_stock}
@@ -328,7 +326,8 @@ async def finalize_stock_out(request: StockOutRequestList, db: Session = Depends
             else:
                 raise HTTPException(status_code=400, detail=f"Unsupported unit: {item.unit}")
 
-            product_repo.update_stock_out_product(product_code=item.code, product_data=product_data, updated_by=current_user.name)
+            product_repo.update_stock_out_product(product_code=item.code, product_data=product_data,
+                                                  updated_by=current_user.name)
 
         return {"message": "Stock out process completed successfully."}
     except Exception as e:
