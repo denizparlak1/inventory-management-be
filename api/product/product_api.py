@@ -175,18 +175,34 @@ async def upload_logo(file: UploadFile = File(...)):
 @router.get("/invoice-data/")
 async def get_invoice_data():
     try:
+        # JSON dosyasını yükle
         with open("static/invoice_data.json", "r", encoding="utf-8") as f:
             invoice_data = json.load(f)
 
+        # Logoları kontrol et ve logo yolunu ekle
         upload_directory = "static/logos"
         logo_files = os.listdir(upload_directory)
         print(logo_files)
+
+        # Eğer logo dosyası varsa ve dosya yolunu bulabiliyorsak logo yolunu ekleyelim
         if logo_files:
-            invoice_data["logo_path"] = f"/static/logos/{logo_files[0]}"
-            print(invoice_data["logo_path"])
+            logo_path = f"/static/logos/{logo_files[0]}"
+
+            # Logonun gerçekten mevcut olup olmadığını kontrol edelim
+            if os.path.exists(os.path.join(upload_directory, logo_files[0])):
+                invoice_data["logo_path"] = logo_path
+            else:
+                invoice_data["logo_path"] = None  # Logo bulunmazsa None ekle
+        else:
+            invoice_data["logo_path"] = None  # Eğer logosuz devam etmek isterseniz None ekleyin
+
         return JSONResponse(content=invoice_data)
+
     except FileNotFoundError:
         return JSONResponse(content={"message": "Invoice data not found"}, status_code=404)
+    except Exception as e:
+        return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=500)
+
 
 
 @router.post("/invoice-data/")
