@@ -160,8 +160,9 @@
 <div id="pdf-content">
     <div class="header">
         <div class="logo-container" id="logoPreview">
-            <p>Logo Yok</p>
-        </div>
+    <img src="/static/logo.png" alt="Company Logo">
+</div>
+
     </div>
 
     <div class="section">
@@ -228,7 +229,6 @@
             document.getElementById('district').textContent = invoiceData.invoice.district;
             document.getElementById('date').textContent = invoiceData.invoice.creationDate;
             document.getElementById('institution').textContent = invoiceData.invoice.institution;
-            console.log(invoiceData.logo_path)
             // Teslim alan ve iş emrini hazırlayanın isimleri
             document.getElementById('delivered-to').textContent = invoiceData.invoice.responsiblePerson || 'Teslim Alan Yok';
             document.getElementById('prepared-by-sign').textContent = invoiceData.invoice.preparedBy;
@@ -249,7 +249,8 @@
 
             if (invoiceData.logo_path) {
                 const logoPreview = document.getElementById("logoPreview");
-                logoPreview.innerHTML = `<img src="/static/logos/logo.png" alt="Company Logo">`;
+                logoPreview.innerHTML = `<img src="/static/logo.png" alt="Company Logo">`;
+
             }
         })
         .catch(error => console.error("Veriler yüklenemedi:", error));

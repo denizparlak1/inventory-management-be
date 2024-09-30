@@ -136,20 +136,18 @@ def read_change_logs(db: Session = Depends(get_db)):
 
 @router.post("/upload-logo/")
 async def upload_logo(file: UploadFile = File(...)):
-    upload_directory = "static/logos"
+    upload_directory = "static/"
 
-    # Eğer logos dizini yoksa oluştur
     if not os.path.exists(upload_directory):
         os.makedirs(upload_directory)
 
-    # Önceki logo dosyalarını temizle
     for filename in os.listdir(upload_directory):
         file_path = os.path.join(upload_directory, filename)
         if os.path.isfile(file_path):
             os.remove(file_path)
 
-    # Dosyayı her zaman logo.png olarak kaydet
     file_location = os.path.join(upload_directory, "logo.png")
+    print(file_location)
     with open(file_location, "wb+") as file_object:
         shutil.copyfileobj(file.file, file_object)
 
