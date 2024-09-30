@@ -182,6 +182,8 @@ async def get_invoice_data():
             else:
                 # Normal çalışma dizini
                 base_dir = os.path.dirname(os.path.abspath(__file__))
+
+            return os.path.join(base_dir, "static")
         # Geçici dizin veya normal çalışma dizininde statik yol
         static_directory = get_static_directory()
 
