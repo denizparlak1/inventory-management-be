@@ -14,7 +14,7 @@ from starlette.responses import FileResponse
 # Veritabanı tablolarını oluştur
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(debug=True)
 
 # CORS middleware ekliyoruz
 app.add_middleware(
@@ -25,8 +25,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+static_dir = os.path.join(BASE_DIR, "static")
+
 # Statik dosyalar (React build dosyaları)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 # API router'ları ekliyoruz
 app.include_router(auth.router, prefix="/api/authentication", tags=["auth"])
@@ -36,13 +39,14 @@ app.include_router(analytic_api.router, prefix="/api/analytics", tags=["analytic
 # React frontend'i serve ediyoruz
 @app.get("/")
 def serve_react_app():
-    return FileResponse("static/index.html")
+    index_file = os.path.join(static_dir, "index.html")
+    return FileResponse(index_file)
 
 # Tüm diğer yolları index.html'e yönlendirme
 @app.get("/{full_path:path}")
 def catch_all(full_path: str):
-    return FileResponse("static/index.html")
-
+    index_file = os.path.join(static_dir, "index.html")
+    return FileResponse(index_file)
 
 # Sunucunun durdurulmasını sağlamak için bir global değişken ekliyoruz
 server_should_stop = False
@@ -52,6 +56,8 @@ def start_fastapi():
     # Log seviyesini debug olarak ayarlıyoruz
     config = uvicorn.Config(app, host="127.0.0.1", port=8000, reload=False, log_level="debug")
     server = uvicorn.Server(config)
+    server.run()  # Döngü yerine sadece server.run()
+
 
     while not server_should_stop:  # Sunucuyu manuel olarak durdurabiliriz
         server.run()
@@ -63,18 +69,18 @@ def on_closed():
     server_should_stop = True  # Sunucunun durmasını sağlayın
 
 if __name__ == "__main__":
-    # FastAPI sunucusunu bir thread içinde başlat
     server_thread = threading.Thread(target=start_fastapi)
     server_thread.start()
 
-    # Sunucunun başlamasını bekliyoruz
-    time.sleep(2)  # Sunucunun başlatılması için bekleme süresi
+    time.sleep(2)
 
     # PyWebView ile masaüstü uygulaması aç
     window = webview.create_window("KAO STOK YÖNETİM", "http://127.0.0.1:8000")
 
-    # Windows için 'cef' ya da 'mshtml' kullanabilirsiniz.
-    webview.start(func=on_closed, gui='cef')  # Windows ortamında 'cef' kullanımı
+    # Uygulama kapatıldığında PyWebView'in kapanma işlevini tanımla
+    # Burada GUI motorunu manuel olarak belirliyoruz
+    webview.start(func=on_closed, gui='edgechromium')  # 'cef', 'mshtml' veya 'edgechromium' deneyin
 
     # Uygulama kapatıldığında thread'in kapanmasını sağla
     server_thread.join()
+
