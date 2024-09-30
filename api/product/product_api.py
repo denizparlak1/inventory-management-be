@@ -136,31 +136,24 @@ def read_change_logs(db: Session = Depends(get_db)):
 
 @router.post("/upload-logo/")
 async def upload_logo(file: UploadFile = File(...)):
-    try:
-        # Statik dizin altında logos dizinini kullanarak logo dosyasını kaydet
-        upload_directory = "static/logos"
+    upload_directory = "static/logos"
 
-        # Eğer logos dizini yoksa oluştur
-        if not os.path.exists(upload_directory):
-            os.makedirs(upload_directory)
+    # Eğer logos dizini yoksa oluştur
+    if not os.path.exists(upload_directory):
+        os.makedirs(upload_directory)
 
-        # Önceki logo dosyalarını temizle (sadece bir logo saklamak için)
-        for filename in os.listdir(upload_directory):
-            file_path = os.path.join(upload_directory, filename)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
+    # Önceki logo dosyalarını temizle
+    for filename in os.listdir(upload_directory):
+        file_path = os.path.join(upload_directory, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
 
-        # Yeni logo dosyasını kaydet
-        file_location = os.path.join(upload_directory, file.filename)
-        with open(file_location, "wb+") as file_object:
-            shutil.copyfileobj(file.file, file_object)
-        print(file_location)
-        return {"success": True, "file_path": file_location}
+    # Dosyayı her zaman logo.png olarak kaydet
+    file_location = os.path.join(upload_directory, "logo.png")
+    with open(file_location, "wb+") as file_object:
+        shutil.copyfileobj(file.file, file_object)
 
-    except Exception as e:
-        print(e)
-        return {"success": False, "error": str(e)}
-
+    return {"success": True, "file_path": file_location}
 
 
 @router.get("/invoice-data/")

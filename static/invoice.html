@@ -249,7 +249,7 @@
 
             if (invoiceData.logo_path) {
                 const logoPreview = document.getElementById("logoPreview");
-                logoPreview.innerHTML = `<img src="${invoiceData.logo_path}" alt="Company Logo">`;
+                logoPreview.innerHTML = `<img src="/static/logos/logo.png" alt="Company Logo">`;
             }
         })
         .catch(error => console.error("Veriler yüklenemedi:", error));
