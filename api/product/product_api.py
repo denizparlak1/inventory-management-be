@@ -21,11 +21,8 @@ from schema.product.product_schema import ProductCreate, ProductUpdate, ChangeLo
 router = APIRouter()
 
 UPLOAD_DIR = Path("uploads")
-UPLOAD_DIRECTORY = "static/logos"
-UPLOAD_PDF_DIR = "static/pdfs"
 
-if not os.path.exists(UPLOAD_DIRECTORY):
-    os.makedirs(UPLOAD_DIRECTORY)
+UPLOAD_PDF_DIR = "static/pdfs"
 
 if not UPLOAD_DIR.exists():
     UPLOAD_DIR.mkdir(parents=True)
@@ -137,6 +134,8 @@ def read_change_logs(db: Session = Depends(get_db)):
 
 @router.post("/upload-logo/")
 async def upload_logo(file: UploadFile = File(...)):
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")
     try:
         for filename in os.listdir(UPLOAD_DIRECTORY):
             file_path = os.path.join(UPLOAD_DIRECTORY, filename)
