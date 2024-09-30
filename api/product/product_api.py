@@ -170,16 +170,18 @@ async def get_invoice_data():
 
 @router.post("/invoice-data/")
 async def save_invoice_data(invoice_data: InvoiceData):
-    upload_directory = "static/logos"
-    logo_files = os.listdir(upload_directory)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    upload_directory = os.path.join(current_dir, "static", "logos")
 
+    logo_files = os.listdir(upload_directory)
     logo_path = None
     if logo_files:
-        logo_path = f"{upload_directory}/{logo_files[0]}"
+        logo_path = os.path.join("/static/logos", logo_files[0])  # Web URL'sini oluşturun
 
     invoice_data_with_logo = invoice_data.dict()
     if logo_path:
         invoice_data_with_logo["logo_path"] = logo_path
+
     simplified_products = [
         {
             "name": product["name"],
@@ -190,7 +192,7 @@ async def save_invoice_data(invoice_data: InvoiceData):
         for product in invoice_data_with_logo["products"]
     ]
 
-    with open("static/invoice_data.json", "w", encoding="utf-8") as f:
+    with open(os.path.join(current_dir, "static", "invoice_data.json"), "w", encoding="utf-8") as f:
         json.dump({"invoice": invoice_data_with_logo, "products": simplified_products}, f)
 
     return {"message": "Invoice data saved", "pdf_url": "/static/invoice.html"}

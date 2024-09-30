@@ -29,6 +29,7 @@ app.add_middleware(
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 static_dir = os.path.join(BASE_DIR, "static")
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Statik dosyalar (React build dosyaları)
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
