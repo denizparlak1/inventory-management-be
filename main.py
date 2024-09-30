@@ -73,8 +73,8 @@ if __name__ == "__main__":
     # PyWebView ile masaüstü uygulaması aç
     window = webview.create_window("KAO STOK YÖNETİM", "http://127.0.0.1:8000")
 
-    # Uygulama kapatıldığında PyWebView'in kapanma işlevini tanımla
-    webview.start(func=on_closed, gui='gtk')
+    # Windows için 'cef' ya da 'mshtml' kullanabilirsiniz.
+    webview.start(func=on_closed, gui='cef')  # Windows ortamında 'cef' kullanımı
 
     # Uygulama kapatıldığında thread'in kapanmasını sağla
     server_thread.join()
