@@ -29,7 +29,7 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          pyinstaller --onefile --windowed --add-data "static;static" --hidden-import "pydantic" --hidden-import "databases" --hidden-import "sqlalchemy" main.py
+          pyinstaller --onefile --windowed --add-data "static;static" --hidden-import "pydantic" --hidden-import "passlib.handlers.bcrypt" --hidden-import "databases" --hidden-import "sqlalchemy" main.py
 
       - name: Upload built files
         uses: actions/upload-artifact@v3
