@@ -146,8 +146,8 @@ async def upload_logo(file: UploadFile = File(...)):
         return os.path.join(base_dir, "static")
 
     # Statik dizini al
-    BASE_DIR = get_static_directory()
-    UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "logos")
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")
 
     try:
         if not os.path.exists(UPLOAD_DIRECTORY):
