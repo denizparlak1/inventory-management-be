@@ -2,7 +2,6 @@ import base64
 import json
 import os
 import shutil
-import sys
 from datetime import datetime
 from fastapi.responses import HTMLResponse
 from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File
@@ -12,6 +11,7 @@ from starlette.responses import JSONResponse
 
 from auth.helper import get_current_user
 from db.db import get_db
+
 from models.product.product import Product
 from models.user.user import User
 from repository.change_log.change_log_repository import ChangeLogRepository
@@ -22,11 +22,7 @@ from schema.product.product_schema import ProductCreate, ProductUpdate, ChangeLo
 router = APIRouter()
 
 UPLOAD_DIR = Path("uploads")
-UPLOAD_DIRECTORY = "static/logos"
 UPLOAD_PDF_DIR = "static/pdfs"
-
-if not os.path.exists(UPLOAD_DIRECTORY):
-    os.makedirs(UPLOAD_DIRECTORY)
 
 if not UPLOAD_DIR.exists():
     UPLOAD_DIR.mkdir(parents=True)
@@ -139,12 +135,13 @@ def read_change_logs(db: Session = Depends(get_db)):
 @router.post("/upload-logo/")
 async def upload_logo(file: UploadFile = File(...)):
     try:
+        from main import UPLOAD_DIRECTORY
         for filename in os.listdir(UPLOAD_DIRECTORY):
             file_path = os.path.join(UPLOAD_DIRECTORY, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
-        file_location = f"{UPLOAD_DIRECTORY}/{file.filename}"
+        file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
         with open(file_location, "wb+") as file_object:
             shutil.copyfileobj(file.file, file_object)
 
@@ -157,43 +154,34 @@ async def upload_logo(file: UploadFile = File(...)):
 @router.get("/invoice-data/")
 async def get_invoice_data():
     try:
-        with open("static/invoice_data.json", "r", encoding="utf-8") as f:
+        from main import INVOICE_DATA_PATH
+        with open(INVOICE_DATA_PATH, "r", encoding="utf-8") as f:
             invoice_data = json.load(f)
 
-        upload_directory = "static/logos"
-        logo_files = os.listdir(upload_directory)
+        from main import LOGOS_DIRECTORY
+        logo_files = os.listdir(LOGOS_DIRECTORY)
         if logo_files:
             invoice_data["logo_path"] = f"/static/logos/{logo_files[0]}"
+
         return JSONResponse(content=invoice_data)
+
     except FileNotFoundError:
         return JSONResponse(content={"message": "Invoice data not found"}, status_code=404)
 
 
+
 @router.post("/invoice-data/")
 async def save_invoice_data(invoice_data: InvoiceData):
-    # PyInstaller geçici dizinini kontrol et
-    if getattr(sys, 'frozen', False):
-        # PyInstaller tarafından geçici bir dizinde çalışıyorsak
-        current_dir = sys._MEIPASS
-    else:
-        # Normal çalışma dizini
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # logos klasörünün tam yolunu oluştur
-    upload_directory = os.path.join(current_dir, "static", "logos")
-
-    if not os.path.exists(upload_directory):
-        raise HTTPException(status_code=404, detail="Logos directory not found")
-
+    upload_directory = "static/logos"
     logo_files = os.listdir(upload_directory)
+
     logo_path = None
     if logo_files:
-        logo_path = os.path.join("/static/logos", logo_files[0])  # Web URL'sini oluşturun
+        logo_path = f"{upload_directory}/{logo_files[0]}"
 
     invoice_data_with_logo = invoice_data.dict()
     if logo_path:
         invoice_data_with_logo["logo_path"] = logo_path
-
     simplified_products = [
         {
             "name": product["name"],
@@ -204,9 +192,7 @@ async def save_invoice_data(invoice_data: InvoiceData):
         for product in invoice_data_with_logo["products"]
     ]
 
-    # invoice_data.json dosyasını kaydedin
-    json_output_path = os.path.join(current_dir, "static", "invoice_data.json")
-    with open(json_output_path, "w", encoding="utf-8") as f:
+    with open("static/invoice_data.json", "w", encoding="utf-8") as f:
         json.dump({"invoice": invoice_data_with_logo, "products": simplified_products}, f)
 
     return {"message": "Invoice data saved", "pdf_url": "/static/invoice.html"}
