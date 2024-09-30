@@ -11,7 +11,6 @@ from starlette.responses import JSONResponse
 
 from auth.helper import get_current_user
 from db.db import get_db
-
 from models.product.product import Product
 from models.user.user import User
 from repository.change_log.change_log_repository import ChangeLogRepository
@@ -22,7 +21,11 @@ from schema.product.product_schema import ProductCreate, ProductUpdate, ChangeLo
 router = APIRouter()
 
 UPLOAD_DIR = Path("uploads")
+UPLOAD_DIRECTORY = "static/logos"
 UPLOAD_PDF_DIR = "static/pdfs"
+
+if not os.path.exists(UPLOAD_DIRECTORY):
+    os.makedirs(UPLOAD_DIRECTORY)
 
 if not UPLOAD_DIR.exists():
     UPLOAD_DIR.mkdir(parents=True)
@@ -135,7 +138,6 @@ def read_change_logs(db: Session = Depends(get_db)):
 @router.post("/upload-logo/")
 async def upload_logo(file: UploadFile = File(...)):
     try:
-        from main import UPLOAD_DIRECTORY
         for filename in os.listdir(UPLOAD_DIRECTORY):
             file_path = os.path.join(UPLOAD_DIRECTORY, filename)
             if os.path.isfile(file_path):
@@ -154,20 +156,16 @@ async def upload_logo(file: UploadFile = File(...)):
 @router.get("/invoice-data/")
 async def get_invoice_data():
     try:
-        from main import INVOICE_DATA_PATH
-        with open(INVOICE_DATA_PATH, "r", encoding="utf-8") as f:
+        with open("static/invoice_data.json", "r", encoding="utf-8") as f:
             invoice_data = json.load(f)
 
-        from main import LOGOS_DIRECTORY
-        logo_files = os.listdir(LOGOS_DIRECTORY)
+        upload_directory = "static/logos"
+        logo_files = os.listdir(upload_directory)
         if logo_files:
             invoice_data["logo_path"] = f"/static/logos/{logo_files[0]}"
-
         return JSONResponse(content=invoice_data)
-
     except FileNotFoundError:
         return JSONResponse(content={"message": "Invoice data not found"}, status_code=404)
-
 
 
 @router.post("/invoice-data/")
