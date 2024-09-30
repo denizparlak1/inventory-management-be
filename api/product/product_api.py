@@ -147,8 +147,8 @@ async def upload_logo(file: UploadFile = File(...)):
             shutil.copyfileobj(file.file, file_object)
 
         return {"success": True, "file_path": file_location}
-
     except Exception as e:
+        print(e)
         return {"success": False, "error": str(e)}
 
 
@@ -160,6 +160,7 @@ async def get_invoice_data():
 
         upload_directory = "static/logos"
         logo_files = os.listdir(upload_directory)
+        print(logo_files)
         if logo_files:
             invoice_data["logo_path"] = f"/static/logos/{logo_files[0]}"
         return JSONResponse(content=invoice_data)
