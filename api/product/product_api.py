@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import shutil
+import sys
 from datetime import datetime
 from fastapi.responses import HTMLResponse
 from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File
@@ -134,23 +135,42 @@ def read_change_logs(db: Session = Depends(get_db)):
 
 @router.post("/upload-logo/")
 async def upload_logo(file: UploadFile = File(...)):
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")
+    # PyInstaller geçici dizinini kontrol eden fonksiyon
+    def get_static_directory():
+        if getattr(sys, 'frozen', False):
+            # PyInstaller ile çalışıyorsak geçici dizini kullan
+            base_dir = sys._MEIPASS
+        else:
+            # Normal çalışma dizini
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        return os.path.join(base_dir, "static")
+
+    # Statik dizini al
+    BASE_DIR = get_static_directory()
+    UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "logos")
+
     try:
+        # Eğer logos dizini yoksa oluştur
+        if not os.path.exists(UPLOAD_DIRECTORY):
+            os.makedirs(UPLOAD_DIRECTORY)
+
+        # Eski logoları sil
         for filename in os.listdir(UPLOAD_DIRECTORY):
             file_path = os.path.join(UPLOAD_DIRECTORY, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
 
+        # Yeni logo dosyasını kaydet
         file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
         with open(file_location, "wb+") as file_object:
             shutil.copyfileobj(file.file, file_object)
 
         return {"success": True, "file_path": file_location}
+
     except Exception as e:
         print(e)
         return {"success": False, "error": str(e)}
-
 
 @router.get("/invoice-data/")
 async def get_invoice_data():
