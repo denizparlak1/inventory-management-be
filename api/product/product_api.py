@@ -136,18 +136,9 @@ def read_change_logs(db: Session = Depends(get_db)):
 
 @router.post("/upload-logo/")
 async def upload_logo(file: UploadFile = File(...)):
-    def get_static_directory():
-        if getattr(sys, 'frozen', False):
-            base_dir = sys._MEIPASS
-        else:
-            # Normal çalışma dizini
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        return os.path.join(base_dir, "static")
-
-    # Statik dizini al
+    # BASE_DIR'i uygulamanın gerçek çalışma dizinine göre ayarlıyoruz
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")
+    UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")  # Gerçek statik dizin
 
     try:
         if not os.path.exists(UPLOAD_DIRECTORY):
@@ -160,7 +151,7 @@ async def upload_logo(file: UploadFile = File(...)):
 
         # Yeni logo dosyasını kaydet
         file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
-        print(file_location)
+        print(f"Dosya Yolu: {file_location}")
         with open(file_location, "wb+") as file_object:
             shutil.copyfileobj(file.file, file_object)
 
