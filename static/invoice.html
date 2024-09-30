@@ -160,9 +160,8 @@
 <div id="pdf-content">
     <div class="header">
         <div class="logo-container" id="logoPreview">
-    <img src="/static/logo.png" alt="Company Logo">
-</div>
-
+            <p>Logo Yok</p>
+        </div>
     </div>
 
     <div class="section">
@@ -247,11 +246,13 @@
                 productList.appendChild(row);
             });
 
-            if (invoiceData.logo_path) {
+            fetch('/logo')
+            .then(response => response.blob())
+            .then(imageBlob => {
+                const logoUrl = URL.createObjectURL(imageBlob);
                 const logoPreview = document.getElementById("logoPreview");
-                logoPreview.innerHTML = `<img src="/static/logo.png" alt="Company Logo">`;
-
-            }
+                logoPreview.innerHTML = `<img src="${logoUrl}" alt="Company Logo">`;
+            });
         })
         .catch(error => console.error("Veriler yüklenemedi:", error));
 

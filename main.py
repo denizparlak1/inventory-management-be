@@ -28,12 +28,6 @@ app.add_middleware(
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")
-
-INVOICE_DATA_PATH = os.path.join(BASE_DIR, "static", "invoice_data.json")
-LOGOS_DIRECTORY = os.path.join(BASE_DIR, "static", "logos")
-
 # Statik dosyalar (React build dosyaları)
 static_dir = os.path.join(BASE_DIR, "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
@@ -43,20 +37,29 @@ app.include_router(auth.router, prefix="/api/authentication", tags=["auth"])
 app.include_router(product_api.router, prefix="/api/product", tags=["product"])
 app.include_router(analytic_api.router, prefix="/api/analytics", tags=["analytics"])
 
+
 # React frontend'i serve ediyoruz
 @app.get("/")
 def serve_react_app():
     index_file = os.path.join(static_dir, "index.html")
     return FileResponse(index_file)
 
-# Tüm diğer yolları index.html'e yönlendirme
+
+@app.get("/logo")
+async def get_logo():
+    file_path = os.path.join("static", "logo.png")
+    return FileResponse(file_path)
+
+
 @app.get("/{full_path:path}")
 def catch_all(full_path: str):
     index_file = os.path.join(static_dir, "index.html")
     return FileResponse(index_file)
 
+
 # Sunucunun durdurulmasını sağlamak için bir global değişken ekliyoruz
 server_should_stop = False
+
 
 # FastAPI sunucusunu başlatma fonksiyonu
 def start_fastapi():
@@ -65,15 +68,16 @@ def start_fastapi():
     server = uvicorn.Server(config)
     server.run()  # Döngü yerine sadece server.run()
 
-
     while not server_should_stop:  # Sunucuyu manuel olarak durdurabiliriz
         server.run()
     server.should_exit = True
+
 
 # PyWebView kapatıldığında tetiklenecek fonksiyon
 def on_closed():
     global server_should_stop
     server_should_stop = True  # Sunucunun durmasını sağlayın
+
 
 if __name__ == "__main__":
     server_thread = threading.Thread(target=start_fastapi)
@@ -90,4 +94,3 @@ if __name__ == "__main__":
 
     # Uygulama kapatıldığında thread'in kapanmasını sağla
     server_thread.join()
-
