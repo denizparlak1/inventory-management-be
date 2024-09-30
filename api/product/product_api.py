@@ -151,11 +151,9 @@ async def upload_logo(file: UploadFile = File(...)):
     UPLOAD_DIRECTORY = os.path.join(BASE_DIR, "logos")
 
     try:
-        # Eğer logos dizini yoksa oluştur
         if not os.path.exists(UPLOAD_DIRECTORY):
             os.makedirs(UPLOAD_DIRECTORY)
 
-        # Eski logoları sil
         for filename in os.listdir(UPLOAD_DIRECTORY):
             file_path = os.path.join(UPLOAD_DIRECTORY, filename)
             if os.path.isfile(file_path):
@@ -172,41 +170,31 @@ async def upload_logo(file: UploadFile = File(...)):
         print(e)
         return {"success": False, "error": str(e)}
 
-
-
-
 @router.get("/invoice-data/")
 async def get_invoice_data():
     try:
-        # PyInstaller geçici dizinini kontrol et
-        if getattr(sys, 'frozen', False):
-            # PyInstaller ile paketlenmişse geçici dizin
-            base_dir = sys._MEIPASS
-        else:
-            # Geliştirme ortamında normal dizin
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-
-        static_directory = os.path.join(base_dir, "static")
-
         # JSON dosyasını yükle
-        json_path = os.path.join(static_directory, "invoice_data.json")
-        with open(json_path, "r", encoding="utf-8") as f:
+        with open("static/invoice_data.json", "r", encoding="utf-8") as f:
             invoice_data = json.load(f)
 
         # Logoları kontrol et ve logo yolunu ekle
-        upload_directory = os.path.join(static_directory, "logos")
+        upload_directory = "static/logos"
         logo_files = os.listdir(upload_directory)
         print(logo_files)
 
-        # Eğer logo dosyası varsa
+        # Eğer logo dosyası varsa ve dosya yolunu bulabiliyorsak logo yolunu ekleyelim
         if logo_files:
-            logo_file_path = os.path.join(upload_directory, logo_files[0])
-            if os.path.exists(logo_file_path):
-                invoice_data["logo_path"] = f"/static/logos/{logo_files[0]}"
+            logo_path = f"/static/logos/{logo_files[0]}"
+
+            # Logonun gerçekten mevcut olup olmadığını kontrol edelim
+            if os.path.exists(os.path.join(upload_directory, logo_files[0])):
+                invoice_data["logo_path"] = logo_path
+                print("çıktım")
+                print(invoice_data["logo_path"])
             else:
-                invoice_data["logo_path"] = None  # Dosya bulunamazsa None döndür
+                invoice_data["logo_path"] = None  # Logo bulunmazsa None ekle
         else:
-            invoice_data["logo_path"] = None
+            invoice_data["logo_path"] = None  # Eğer logosuz devam etmek isterseniz None ekleyin
 
         return JSONResponse(content=invoice_data)
 
@@ -214,6 +202,7 @@ async def get_invoice_data():
         return JSONResponse(content={"message": "Invoice data not found"}, status_code=404)
     except Exception as e:
         return JSONResponse(content={"message": f"Error: {str(e)}"}, status_code=500)
+
 
 
 @router.post("/invoice-data/")
