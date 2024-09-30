@@ -1,3 +1,0 @@
-([('main',
-   '/Users/denizparlak/PycharmProjects/inventory-management-be/dist/main',
-   'EXECUTABLE')],)
