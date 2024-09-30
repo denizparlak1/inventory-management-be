@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import shutil
+import sys
 from datetime import datetime
 from fastapi.responses import HTMLResponse
 from fastapi import APIRouter, Depends, HTTPException, Form, UploadFile, File
@@ -170,8 +171,19 @@ async def get_invoice_data():
 
 @router.post("/invoice-data/")
 async def save_invoice_data(invoice_data: InvoiceData):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+    # PyInstaller geçici dizinini kontrol et
+    if getattr(sys, 'frozen', False):
+        # PyInstaller tarafından geçici bir dizinde çalışıyorsak
+        current_dir = sys._MEIPASS
+    else:
+        # Normal çalışma dizini
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # logos klasörünün tam yolunu oluştur
     upload_directory = os.path.join(current_dir, "static", "logos")
+
+    if not os.path.exists(upload_directory):
+        raise HTTPException(status_code=404, detail="Logos directory not found")
 
     logo_files = os.listdir(upload_directory)
     logo_path = None
@@ -192,7 +204,9 @@ async def save_invoice_data(invoice_data: InvoiceData):
         for product in invoice_data_with_logo["products"]
     ]
 
-    with open(os.path.join(current_dir, "static", "invoice_data.json"), "w", encoding="utf-8") as f:
+    # invoice_data.json dosyasını kaydedin
+    json_output_path = os.path.join(current_dir, "static", "invoice_data.json")
+    with open(json_output_path, "w", encoding="utf-8") as f:
         json.dump({"invoice": invoice_data_with_logo, "products": simplified_products}, f)
 
     return {"message": "Invoice data saved", "pdf_url": "/static/invoice.html"}
