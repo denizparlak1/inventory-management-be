@@ -136,10 +136,8 @@ def read_change_logs(db: Session = Depends(get_db)):
 
 @router.post("/upload-logo/")
 async def upload_logo(file: UploadFile = File(...)):
-    # PyInstaller geçici dizinini kontrol eden fonksiyon
     def get_static_directory():
         if getattr(sys, 'frozen', False):
-            # PyInstaller ile çalışıyorsak geçici dizini kullan
             base_dir = sys._MEIPASS
         else:
             # Normal çalışma dizini
@@ -162,6 +160,7 @@ async def upload_logo(file: UploadFile = File(...)):
 
         # Yeni logo dosyasını kaydet
         file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
+        print(file_location)
         with open(file_location, "wb+") as file_object:
             shutil.copyfileobj(file.file, file_object)
 
