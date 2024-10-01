@@ -211,7 +211,7 @@ async def list_pdfs():
     try:
         upload_directory = "static/"
         files = [f for f in os.listdir(upload_directory) if f.endswith(".pdf")]
-        file_list = [{"fileName": file, "filePath": f"{file}"} for file in files]
+        file_list = [{"fileName": file, "filePath": f"/static/{file}"} for file in files]
         print(file_list)
         return file_list
     except Exception as e:
