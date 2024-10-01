@@ -43,7 +43,7 @@ class API:
     def download_pdf(self, file_name):
         file_path = os.path.join(static_dir, file_name)
         if os.path.exists(file_path):
-            save_path = webview.windows[0].create_file_dialog(webview.SAVE_DIALOG, file_name=file_name)
+            save_path = webview.windows[0].create_file_dialog(webview.SAVE_DIALOG, save_filename=file_name)
             if save_path:
                 shutil.copy(file_path, save_path[0])
         else:
