@@ -240,7 +240,7 @@ async def list_pdfs():
         print("testtt")
         print(static_dir)
         files = [f for f in os.listdir(static_dir) if f.endswith(".pdf")]
-        file_list = [{"fileName": file, "filePath": f"{static_dir}'\\'{file}"} for file in files]
+        file_list = [{"fileName": file, "filePath": os.path.join(static_dir, file)} for file in files]
         print(file_list)
         return file_list
     except Exception as e:
