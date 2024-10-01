@@ -209,6 +209,7 @@ async def list_pdfs():
     try:
         files = [f for f in os.listdir(UPLOAD_PDF_DIR) if f.endswith(".pdf")]
         file_list = [{"fileName": file, "filePath": f"/static/pdfs/{file}"} for file in files]
+        print(file_list)
         return file_list
     except Exception as e:
         return {"message": f"Error fetching invoice files: {e}"}
