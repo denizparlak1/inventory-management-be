@@ -190,6 +190,7 @@ async def save_pdf_file(file_data: PDFFileData):
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         # Statik dosyalar (React build dosyaları)
         static_dir = os.path.join(BASE_DIR, "static")
+        print(static_dir)
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         file_name = f"{file_data.fileName}_{timestamp}.pdf"
         file_path = os.path.join(static_dir, file_name)
@@ -199,6 +200,7 @@ async def save_pdf_file(file_data: PDFFileData):
 
         return {"message": "PDF dosyası başarıyla kaydedildi", "file_path": file_path}
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=f"PDF dosyası kaydedilirken hata oluştu: {e}")
 
 
