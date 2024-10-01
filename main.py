@@ -51,9 +51,9 @@ async def get_logo():
     return FileResponse(file_path)
 
 
-@app.get("/{file_name}")
+@app.get("/static/{file_name}")
 async def get_pdf(file_name: str):
-    file_path = os.path.join("static", file_name)
+    file_path = os.path.join(static_dir, file_name)
     if os.path.exists(file_path):
         return FileResponse(file_path, media_type="application/pdf")
     else:
