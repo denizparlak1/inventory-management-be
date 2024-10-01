@@ -12,8 +12,6 @@ from starlette.responses import JSONResponse
 
 from auth.helper import get_current_user
 from db.db import get_db
-from main import BASE_DIR, static_dir
-from models.product.product import Product
 from models.user.user import User
 from repository.change_log.change_log_repository import ChangeLogRepository
 from repository.product.product_repository import ProductRepository
@@ -189,7 +187,9 @@ async def save_invoice_data(invoice_data: InvoiceData):
 @router.post("/invoice/save-pdf/")
 async def save_pdf_file(file_data: PDFFileData):
     try:
-
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        # Statik dosyalar (React build dosyaları)
+        static_dir = os.path.join(BASE_DIR, "static")
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         file_name = f"{file_data.fileName}_{timestamp}.pdf"
         file_path = os.path.join(static_dir, file_name)
@@ -205,6 +205,9 @@ async def save_pdf_file(file_data: PDFFileData):
 @router.get("/pdfs/")
 async def list_pdfs():
     try:
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        # Statik dosyalar (React build dosyaları)
+        static_dir = os.path.join(BASE_DIR, "static")
         files = [f for f in os.listdir(static_dir) if f.endswith(".pdf")]
         file_list = [{"fileName": file, "filePath": f"/static/{file}"} for file in files]
         print(file_list)
