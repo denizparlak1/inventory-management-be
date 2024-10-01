@@ -242,7 +242,8 @@ async def list_pdfs():
         # static_dir'in var olup olmadığını kontrol ediyoruz
         if not os.path.exists(static_dir):
             os.makedirs(static_dir)
-
+        print("testtt")
+        print(static_dir)
         # PDF dosyalarını listeliyoruz
         files = [f for f in os.listdir(static_dir) if f.endswith(".pdf")]
         file_list = [{"fileName": file, "filePath": f"/static/{file}"} for file in files]
