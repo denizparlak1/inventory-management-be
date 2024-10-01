@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import webview
 import threading
@@ -38,6 +39,20 @@ app.include_router(product_api.router, prefix="/api/product", tags=["product"])
 app.include_router(analytic_api.router, prefix="/api/analytics", tags=["analytics"])
 
 
+class API:
+    def download_pdf(self, file_name):
+        file_path = os.path.join(static_dir, file_name)
+        if os.path.exists(file_path):
+            save_path = webview.windows[0].create_file_dialog(webview.SAVE_DIALOG, file_name=file_name)
+            if save_path:
+                shutil.copy(file_path, save_path[0])
+        else:
+            print("Dosya bulunamadı:", file_path)
+
+
+api = API()
+
+
 # React frontend'i serve ediyoruz
 @app.get("/")
 def serve_react_app():
@@ -49,15 +64,6 @@ def serve_react_app():
 async def get_logo():
     file_path = os.path.join("static", "logo.png")
     return FileResponse(file_path)
-
-
-@app.get("/static/{file_name}")
-async def get_pdf(file_name: str):
-    file_path = os.path.join(static_dir, file_name)
-    if os.path.exists(file_path):
-        return FileResponse(file_path, media_type="application/pdf")
-    else:
-        return {"detail": "Dosya bulunamadı"}
 
 
 @app.get("/{full_path:path}")
@@ -95,7 +101,7 @@ if __name__ == "__main__":
     time.sleep(2)
 
     # PyWebView ile masaüstü uygulaması aç
-    window = webview.create_window("KAO STOK YÖNETİM", "http://127.0.0.1:8000")
+    window = webview.create_window("KAO STOK YÖNETİM", "http://127.0.0.1:8000", js_api=api)
 
     # Uygulama kapatıldığında PyWebView'in kapanma işlevini tanımla
     # Burada GUI motorunu manuel olarak belirliyoruz
