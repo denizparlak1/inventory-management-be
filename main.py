@@ -43,11 +43,9 @@ app.include_router(analytic_api.router, prefix="/api/analytics", tags=["analytic
 
 class API:
 
-    def download_pdf(self, file_name):
-        # Ön ekli karakterleri kaldırıyoruz
+    def preview_pdf(self, file_name):
         file_name = file_name.lstrip('/\\')
 
-        # Dosya yolunu oluşturuyoruz
         if getattr(sys, 'frozen', False):
             BASE_DIR = os.path.dirname(sys.executable)
         else:
@@ -59,7 +57,6 @@ class API:
 
         if os.path.exists(file_path):
             try:
-                # İşletim sistemine göre dosyayı açma
                 if sys.platform.startswith('darwin'):
                     # macOS için
                     subprocess.Popen(['open', file_path])

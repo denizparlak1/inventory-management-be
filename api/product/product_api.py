@@ -49,7 +49,6 @@ async def create_new_product(
         file: UploadFile = File(None),
         db: Session = Depends(get_db)
 ):
-    print(current_user.name)
     image_path = None
     if file:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -145,7 +144,6 @@ async def upload_logo(file: UploadFile = File(...)):
             os.remove(file_path)
 
     file_location = os.path.join(upload_directory, "logo.png")
-    print(file_location)
     with open(file_location, "wb+") as file_object:
         shutil.copyfileobj(file.file, file_object)
 
@@ -187,29 +185,20 @@ async def save_invoice_data(invoice_data: InvoiceData):
 @router.post("/invoice/save-pdf/")
 async def save_pdf_file(file_data: PDFFileData):
     try:
-        # BASE_DIR'i uygulamanın çalıştığı dizine ayarlıyoruz
         if getattr(sys, 'frozen', False):
-            # PyInstaller ile paketlenmiş uygulama çalışıyor
             BASE_DIR = os.path.dirname(sys.executable)
         else:
-            # Normal Python ortamı
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-        # Dosyaları kaydetmek için bir dizin belirliyoruz (örneğin 'data')
         data_dir = os.path.join(BASE_DIR, "data")
 
-        # Eğer data_dir yoksa oluşturuyoruz
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
 
-        # PDF dosyalarını kaydetmek için 'static' dizinini kullanıyoruz
         static_dir = os.path.join(data_dir, "static")
 
-        # Eğer static_dir yoksa oluşturuyoruz
         if not os.path.exists(static_dir):
             os.makedirs(static_dir)
-
-        print("static_dir:", static_dir)
 
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         file_name = f"{file_data.fileName}_{timestamp}.pdf"
@@ -220,7 +209,6 @@ async def save_pdf_file(file_data: PDFFileData):
 
         return {"message": "PDF dosyası başarıyla kaydedildi", "file_path": file_path}
     except Exception as e:
-        print(e)
         raise HTTPException(status_code=500, detail=f"PDF dosyası kaydedilirken hata oluştu: {e}")
 
 
@@ -237,14 +225,10 @@ async def list_pdfs():
 
         if not os.path.exists(static_dir):
             os.makedirs(static_dir)
-        print("testtt")
-        print(static_dir)
         files = [f for f in os.listdir(static_dir) if f.endswith(".pdf")]
         file_list = [{"fileName": file, "filePath": os.path.join(static_dir, file)} for file in files]
-        print(file_list)
         return file_list
     except Exception as e:
-        print(e)
         return {"message": f"Error fetching invoice files: {e}"}
 
 
