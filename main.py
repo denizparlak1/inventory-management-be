@@ -51,10 +51,6 @@ async def get_logo():
     return FileResponse(file_path)
 
 
-@app.get("/static/pdfs/stok_cikis_bilgileri_20241001135057.pdf")
-async def get_pdf():
-    return "test"
-
 
 @app.get("/{full_path:path}")
 def catch_all(full_path: str):
