@@ -12,6 +12,7 @@ from starlette.responses import JSONResponse
 
 from auth.helper import get_current_user
 from db.db import get_db
+from main import BASE_DIR, static_dir
 from models.product.product import Product
 from models.user.user import User
 from repository.change_log.change_log_repository import ChangeLogRepository
@@ -188,14 +189,10 @@ async def save_invoice_data(invoice_data: InvoiceData):
 @router.post("/invoice/save-pdf/")
 async def save_pdf_file(file_data: PDFFileData):
     try:
-        upload_directory = "static/"
-
-        if not os.path.exists(upload_directory):
-            os.makedirs(upload_directory)
 
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         file_name = f"{file_data.fileName}_{timestamp}.pdf"
-        file_path = os.path.join(upload_directory, file_name)
+        file_path = os.path.join(static_dir, file_name)
 
         with open(file_path, "wb") as f:
             f.write(base64.b64decode(file_data.file))
@@ -208,9 +205,8 @@ async def save_pdf_file(file_data: PDFFileData):
 @router.get("/pdfs/")
 async def list_pdfs():
     try:
-        upload_directory = "static/"
-        files = [f for f in os.listdir(upload_directory) if f.endswith(".pdf")]
-        file_list = [{"fileName": file, "filePath": f"{file}"} for file in files]
+        files = [f for f in os.listdir(static_dir) if f.endswith(".pdf")]
+        file_list = [{"fileName": file, "filePath": f"/static/{file}"} for file in files]
         print(file_list)
         return file_list
     except Exception as e:
