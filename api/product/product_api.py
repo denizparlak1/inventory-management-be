@@ -159,23 +159,6 @@ async def get_invoice_data():
     try:
         with open("static/invoice_data.json", "r", encoding="utf-8") as f:
             invoice_data = json.load(f)
-
-        upload_directory = "static/logos"
-        logo_files = os.listdir(upload_directory)
-        print(logo_files)
-
-        if logo_files:
-            logo_path = f"/static/logos/{logo_files[0]}"
-
-            if os.path.exists(os.path.join(upload_directory, logo_files[0])):
-                invoice_data["logo_path"] = logo_path
-                print("çıktım")
-                print(invoice_data["logo_path"])
-            else:
-                invoice_data["logo_path"] = None
-        else:
-            invoice_data["logo_path"] = None
-
         return JSONResponse(content=invoice_data)
 
     except FileNotFoundError:
@@ -186,16 +169,7 @@ async def get_invoice_data():
 
 @router.post("/invoice-data/")
 async def save_invoice_data(invoice_data: InvoiceData):
-    upload_directory = "static/logos"
-    logo_files = os.listdir(upload_directory)
-
-    logo_path = None
-    if logo_files:
-        logo_path = f"{upload_directory}/{logo_files[0]}"
-
     invoice_data_with_logo = invoice_data.dict()
-    if logo_path:
-        invoice_data_with_logo["logo_path"] = logo_path
     simplified_products = [
         {
             "name": product["name"],
