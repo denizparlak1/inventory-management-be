@@ -227,14 +227,29 @@ async def save_pdf_file(file_data: PDFFileData):
 @router.get("/pdfs/")
 async def list_pdfs():
     try:
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        # Statik dosyalar (React build dosyaları)
-        static_dir = os.path.join(BASE_DIR, "static")
+        # BASE_DIR'i uygulamanın çalıştığı dizine ayarlıyoruz
+        if getattr(sys, 'frozen', False):
+            # PyInstaller ile paketlenmiş uygulama çalışıyor
+            BASE_DIR = os.path.dirname(sys.executable)
+        else:
+            # Normal Python ortamı
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+        # Dosyaların kaydedildiği dizinleri ayarlıyoruz
+        data_dir = os.path.join(BASE_DIR, "data")
+        static_dir = os.path.join(data_dir, "static")
+
+        # static_dir'in var olup olmadığını kontrol ediyoruz
+        if not os.path.exists(static_dir):
+            os.makedirs(static_dir)
+
+        # PDF dosyalarını listeliyoruz
         files = [f for f in os.listdir(static_dir) if f.endswith(".pdf")]
         file_list = [{"fileName": file, "filePath": f"/static/{file}"} for file in files]
         print(file_list)
         return file_list
     except Exception as e:
+        print(e)
         return {"message": f"Error fetching invoice files: {e}"}
 
 
