@@ -1,5 +1,7 @@
 import os
 import shutil
+import subprocess
+import sys
 
 import webview
 import threading
@@ -40,15 +42,39 @@ app.include_router(analytic_api.router, prefix="/api/analytics", tags=["analytic
 
 
 class API:
+
     def download_pdf(self, file_name):
+        # Ön ekli karakterleri kaldırıyoruz
+        file_name = file_name.lstrip('/\\')
+
+        # Dosya yolunu oluşturuyoruz
+        if getattr(sys, 'frozen', False):
+            BASE_DIR = os.path.dirname(sys.executable)
+        else:
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+        data_dir = os.path.join(BASE_DIR, "data")
+        static_dir = os.path.join(data_dir, "static")
         file_path = os.path.join(static_dir, file_name)
+
         if os.path.exists(file_path):
-            save_path = webview.windows[0].create_file_dialog(webview.SAVE_DIALOG, save_filename=file_name)
-            if save_path:
-                shutil.copy(file_path, save_path[0])
+            try:
+                # İşletim sistemine göre dosyayı açma
+                if sys.platform.startswith('darwin'):
+                    # macOS için
+                    subprocess.Popen(['open', file_path])
+                elif sys.platform.startswith('linux'):
+                    # Linux için
+                    subprocess.Popen(['xdg-open', file_path])
+                elif sys.platform.startswith('win'):
+                    # Windows için
+                    os.startfile(file_path)
+                else:
+                    print("Desteklenmeyen platform:", sys.platform)
+            except Exception as e:
+                print("Dosya açılırken hata oluştu:", e)
         else:
             print("Dosya bulunamadı:", file_path)
-
 
 api = API()
 
