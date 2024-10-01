@@ -208,7 +208,7 @@ async def save_pdf_file(file_data: PDFFileData):
 async def list_pdfs():
     try:
         files = [f for f in os.listdir(UPLOAD_PDF_DIR) if f.endswith(".pdf")]
-        file_list = [{"fileName": file, "filePath": f"/{UPLOAD_PDF_DIR}/{file}"} for file in files]
+        file_list = [{"fileName": file, "filePath": f"/static/pdfs/{file}"} for file in files]
         return file_list
     except Exception as e:
         return {"message": f"Error fetching invoice files: {e}"}
